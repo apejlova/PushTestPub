@@ -1,0 +1,500 @@
+openapi: 3.0.2
+info:
+  title: PushServer
+  description: Provides API for sending push notifications to mobile devices.
+  version: '1.1'
+servers:
+  - url: 'https://{serverName}/pushserver/v1.1/'
+    description: push server URL
+    variables:
+      serverName:
+        default: localhost
+paths:
+  '/instances':
+    put:
+      summary: Register instance
+      operationId: registerInstance
+      tags:
+        - Instance management
+      responses:
+        '200':
+          description: Instance successfuly registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/OK'
+                  data: 
+                    type: object
+                    nullable: true
+                required:
+                  - ok
+              examples:
+                OK:
+                  value:
+                    status: 'success'
+                    data: null
+        '400':
+          description: Validation of input/output data failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DATA_VALIDATION_ERROR:
+                  $ref: '#/components/examples/DataValidationError'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AUTHENTICATION_ERROR:
+                  $ref: '#/components/examples/AuthenticationError'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DB_ERROR:
+                  $ref: '#/components/examples/DbError'
+                UNKNOWN_ERROR:
+                  $ref: '#/components/examples/UnknownError'
+      description: Register instance and its push token on push server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instance:
+                  type: object
+                  description: Registered instance object
+                  properties:
+                    appId:
+                      $ref: '#/components/schemas/appId'
+                    instanceId:
+                      $ref: '#/components/schemas/instanceId'
+                    platform:
+                      $ref: '#/components/schemas/platform'
+                  required:
+                   - appId
+                   - instanceId
+                   - platform
+                token:
+                  type: object
+                  description: Registered push token object
+                  properties:
+                    value:
+                      type: string
+                    type:
+                      type: string
+                      enum:
+                        - FCM
+                        - VENDOR
+                  required:
+                    - value
+                    - type
+              required:
+                - instance
+                - token
+            examples:
+              Android:
+                value:
+                  instance:
+                    appId: 'idport'
+                    instanceId: 'bb4e6c05c4002f8703f223719eaa502abd9ec797d51b00cc6ec021e6411da88e'
+                    platform: 'ANDROID'
+                  token:
+                    value: 'ethBCufdmX4:APA91bG3KKZC9tICLOUOtFW-d1096vFUsq3iNeCHE49C-Xgmb6msFuSbnIs5NNUrBd-85pUBwSl0vtHei7m4LawYTkmFsGd2cFJk5xQN-8ofCVJnABmW9ctmO14t6g5Lova1Xg--bQoP'
+                    type: FCM
+              iOS:
+                value:
+                  instance:
+                    appId: 'idport'
+                    instanceId: '806eca4c9ed704bfbd3c83484d96440cc39a113f292267a4cb0b675798bb50b4'
+                    platform: 'IOS'
+                  token:
+                    value: 'f4EKpkBrJE5JgzGSXwMIpS:APA91bEOivY8ulrZJ-QS6Ck4wPwBKzkX9sQ4wwPyY-ackT9zV7n0BqK60KN1OQSvgjkYyBwaMCmlDZeKAZqf1nWVXteiC0U0hBAbuwcxQUikoE-KFfDjJiD4TAVbfMHysUtboBg3l2uI'
+                    type: FCM
+        description: Defines instance details and token value to be registered
+    delete:
+      summary: Unregister instance
+      operationId: unregisterInstance
+      tags:
+        - Instance management
+      responses:
+        '200':
+          description: Instance successfuly unregistered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/OK'
+                  data: 
+                    type: object
+                    nullable: true
+                required:
+                  - ok
+              examples:
+                OK:
+                  value:
+                    status: 'success'
+                    data: null
+        '400':
+          description: Validation of input/output data failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DATA_VALIDATION_ERROR:
+                  $ref: '#/components/examples/DataValidationError'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AUTHENTICATION_ERROR:
+                  $ref: '#/components/examples/AuthenticationError'
+        '422':
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                INSTANCE_NOT_FOUND:
+                  $ref: '#/components/examples/InstanceNotFound'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DB_ERROR:
+                  $ref: '#/components/examples/DbError'
+                UNKNOWN_ERROR:
+                  $ref: '#/components/examples/UnknownError'
+      description: Unregister instance from push server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instance:
+                  type: object
+                  description: Unregistered instance object
+                  properties:
+                    appId:
+                      $ref: '#/components/schemas/appId'
+                    instanceId:
+                      $ref: '#/components/schemas/instanceId'
+                  required:
+                   - appId
+                   - instanceId
+              required:
+                - instance
+            examples:
+              Android/iOS:
+                value:
+                  instance:
+                    appId: 'idport'
+                    instanceId: 'bb4e6c05c4002f8703f223719eaa502abd9ec797d51b00cc6ec021e6411da88e'
+        description: Specifies application and instance that should be unregistered.
+  '/messages:send':
+    post:
+      summary: Send push notification
+      operationId: sendMessage
+      tags:
+        - Messages sending
+      responses:
+        '202':
+          description: Push notification message accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/OK'
+                  data: 
+                    type: object
+                    nullable: true
+                required:
+                  - ok
+              examples:
+                OK:
+                  value:
+                    status: 'success'
+                    data: null
+        '400':
+          description: Validation of input/output data failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DATA_VALIDATION_ERROR:
+                  $ref: '#/components/examples/DataValidationError'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AUTHENTICATION_ERROR:
+                  $ref: '#/components/examples/AuthenticationError'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                UNKNOWN_ERROR:
+                  $ref: '#/components/examples/UnknownError'
+      description: Send message that is delivered as push notification on mobile device
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appId:
+                  $ref: '#/components/schemas/appId'
+                instanceId:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/instanceId'
+                message:
+                  $ref: '#/components/schemas/message'
+              required:
+               - appId
+               - instanceId
+               - message
+            examples:
+              Business transaction:
+                value:
+                  appId: 'idport'
+                  instanceId: 
+                    - 'bb4e6c05c4002f8703f223719eaa502abd9ec797d51b00cc6ec021e6411da88e'
+                  message:
+                    pushType: 'trx_b_{pin|no_pin|no_pin_detail}'
+                    notification:
+                      title: 'P�ihl�en� do aplikace'
+                      body: 'Yourbank internet banking'
+                    priority: 5
+                    data:
+                      transactionId: 'ZZenFl0G9otDCCq882xWPvFZCxlNlBO3Bimmq3RED4QKzsGczmZjYdc/b0/NUSwPUTEc5PihDBGNnzAH/ivcwQtnXVFwNjV2SrrFsLip/4AhypLMdNdlSVq/5gjkUuhK'
+              Info message:
+                value:
+                  TBD: XXX
+        description: Defines notification message text data and other attributes
+  '/messages:batch':
+    post:
+      summary: Send batch push notification
+      operationId: sendMessageBatch
+      tags:
+        - Messages sending
+      responses:
+        '202':
+          description: Push notification message accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/OK'
+                  data: 
+                    type: object
+                    nullable: true
+                required:
+                  - ok
+              examples:
+                OK:
+                  value:
+                    status: 'success'
+                    data: null
+        '400':
+          description: Validation of input/output data failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                DATA_VALIDATION_ERROR:
+                  $ref: '#/components/examples/DataValidationError'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AUTHENTICATION_ERROR:
+                  $ref: '#/components/examples/AuthenticationError'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                UNKNOWN_ERROR:
+                  $ref: '#/components/examples/UnknownError'
+      description: Send message that is delivered as push notification on all registered mobile devices with specified platform.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appId:
+                  $ref: '#/components/schemas/appId'
+                platform:
+                 $ref: '#/components/schemas/instanceId'
+                message:
+                  $ref: '#/components/schemas/message'
+              required:
+               - appId
+               - platform
+               - message
+            examples:
+              Android:
+                value:
+                  appId: 'idport'
+                  platform: 'ANDROID'
+                  message:
+                    pushType: 'trx_b_{pin|no_pin|no_pin_detail}|trx_info_msg|trx_cancel'
+                    notification:
+                      title: 'P�ihl�en� do aplikace'
+                      body: 'Yourbank internet banking'
+                    priority: 5
+                    data:
+                      transactionId: 'ZZenFl0G9otDCCq882xWPvFZCxlNlBO3Bimmq3RED4QKzsGczmZjYdc/b0/NUSwPUTEc5PihDBGNnzAH/ivcwQtnXVFwNjV2SrrFsLip/4AhypLMdNdlSVq/5gjkUuhK'
+        description: Defines notification message text data and desired platform         
+
+components:
+# headers:
+  examples:
+    DataValidationError:
+      description: 'NOT USED'
+      value:
+        status: 'error'
+        code: 50
+        message: 'XXX'
+    AuthenticationError:
+      value:
+        status: 'error'
+        code: 401
+        message: 'missing token'
+    InstanceNotFound:
+      value:
+        status: 'error'
+        code: 404
+        message: 'Instance XXX not found'
+    DbError:
+      value:
+        status: 'error'
+        code: 5
+        message: 'Persistent operation XXX failed with code: YYY'
+    UnknownError:
+      value:
+        status: 'error'
+        code: 500
+        message: 'An application exception has occurred'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'JWS token (RFC 7515) with signature algorithm HS256, payload parameters: appId, iss=clientId, iat=timestamp; secret for symmetric key is stored in JBoss Vault or encrypted in IDport Manager, property APPLICATIONS.SECRETKEY'
+#  parameters: URL path?
+
+#  responses:
+
+  schemas:
+    appId:
+      type: string
+      description: Name of application, that is registering instances.
+    instanceId:
+      type: string
+      description: Identifier of instance
+      format: sha256hexa
+    platform:
+      type: string
+      description: Mobile device OS
+      enum:
+        - ANDROID
+        - IOS
+    message:
+      type: object
+      description: Push notification message object
+      properties:
+        pushType:
+          type: string
+          description: Type of notification message that defines notification category on mobile device.
+          enum:
+            - trx_b_pin
+            - trx_b_no_pin
+            - trx_b_no_pin_detail
+            - trx_info_msg
+            - trx_cancel
+        notification:
+          type: object
+          description: Notification message texts for title and body
+          properties:
+            title:
+              type: string
+              description: Notification mesage header title
+            body: 
+              type: string
+              description:
+                Notification message body data
+        priority:
+          type: integer
+          description: 'Indicates priority of notification message processing on push server'
+#        trackingId
+        data:
+          type: object
+          description: 'Any JSON object of parameters that should be mapped into notification data (eg. transactionId), based on specific template rules.'
+
+    OK:
+      type: string
+      description: 'OK'
+    error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: 'error'
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+      required:
+      - status
+      - code
+      - message
+      description: Error object in case of unsuccessful processing
+
+security:
+  - bearerAuth: []
+  
